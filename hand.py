@@ -1,12 +1,13 @@
 import card
 import deck
+import player
 class Hand():
     def __init__(self):
         self.cards=[]
-        self.isBusted=0
+        self.isBusted=False
+        self.result=0
         self.wager=0
         self.aces=0
-        self.acesUsed=0
         self.value=0
     def updateValue(self):
         self.value=0
@@ -25,21 +26,26 @@ class Hand():
                 self.aces-=1
                 self.updateValue()
             else:
-                self.isBusted=1
+                self.isBusted=True
     def setWager(self,wager):
         self.wager=wager
-    def show(self,type="full"):
+    def show(self,player,type="full"):
         if type=="full":
-            soft=""
+            note=""
             if self.aces!=0 and self.value!=21:
-                soft="soft"
+                note=" soft"
+            elif self.value==21 and len(self.cards)==2:
+                note=" BLACKJACK!!!"
+            elif self.isBusted==True:
+                note=" BUSTED!!!"
+
             handSummary=""
             for i in self.cards:
                 if self.wager:
                     handSummary=handSummary + i.name+","
                 else:
                     handSummary = handSummary + i.name + ","
-            handSummary=handSummary+"total value: "+soft+" "+str(self.value)
+            handSummary=handSummary+"total value: "+str(self.value)+note
             return handSummary
         else:
             handSummary=str(self.cards[0].name)+",hidden card,"
