@@ -5,7 +5,7 @@ class Card(object):
         self.rank = id%13
         match self.rank:
             case 1:
-                self.value=11
+                self.value=1
                 self.name="As "
             case 11:
                 self.value=10
