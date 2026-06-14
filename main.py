@@ -2,7 +2,7 @@ import card
 import deck
 import hand
 import player
-import functions as f
+import game as g
 numberOfPlayers=1
 Deck=deck.Deck(1)
 Deck.shuffle()
@@ -20,13 +20,13 @@ else:
 game=input("zaczac gre?")
 while(game=="tak"):
     #zaczela sie runda
-    f.roundStart(participants,Deck)
+    g.roundStart(participants,Deck)
     for j in participants:
         if j.name != "dealer":
             for i in j.hands:
-                f.playerTurn(Deck,i,j,participants)
-    f.dealerTurn(Deck,participants)
-    f.checkResult(Deck,participants)
+                g.playerTurn(Deck,i,j,participants)
+    g.dealerTurn(Deck,participants)
+    g.checkResult(Deck,participants)
     for j in participants:
         if j.name != "dealer":
             for i in j.hands:
