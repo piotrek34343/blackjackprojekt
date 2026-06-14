@@ -8,6 +8,7 @@ class Deck:
     def shuffle(self):
         self.fill()
         rnd.shuffle(self.cards)
+        print("talia zostala przetasowana")
     def fill(self):
         self.cards=[]
         for j in range(self.DeckAmount):

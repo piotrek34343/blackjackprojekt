@@ -2,16 +2,19 @@ from unittest import case
 
 import hand
 import player
-def roundStart(participants,Deck,wagers):
+def roundStart(participants,Deck):
     for j in participants:
         j.addHand(hand.Hand())
         for i in j.hands:
             i.drawFrom(Deck)
             i.drawFrom(Deck)
             if j.name != "dealer":
-                w=wagers.pop()
-                i.setWager(w)
-                j.balance-=w
+                stawka = int(input(j.name+" stawka:"))
+                while stawka > j.balance:
+                    print("za malo srodkow")
+                    stawka = int(input("stawka:"))
+                i.wager=stawka
+                j.balance-=stawka
     showAll(participants,"player")
 def showAll(participants,turn="player"):
     print("===============================================================")
@@ -21,19 +24,20 @@ def showAll(participants,turn="player"):
                 handIterator = ""
                 if len(j.hands) > 1:
                     handIterator = "Hand" + str(j.hands.index(i)+1)
-                print("\n" + j.name +" "+handIterator)
+                print("\n" + j.name+" "+handIterator)
                 if j.name == "dealer":
                     print(i.show("half"))
                 else:
+                    print("stan konta:"+str(j.balance))
                     print("stawka:"+str(i.wager))
                     print(i.show("full"))
     else:
         for j in participants:
             for i in j.hands:
                 print("\n" + j.name)
-                print(i.show("full"))
                 if j.name != "dealer":
                     print("stawka:"+str(i.wager))
+                print(i.show("full"))
 def playerTurn(Deck,Hand,Player,participants):
     #1-pass, 2-dobierz, 3-double,4-split,5-insurance
     Index = Player.hands.index(Hand) + 1
@@ -42,13 +46,18 @@ def playerTurn(Deck,Hand,Player,participants):
     else:
         possibilities=["pass","hit"]
         if len(Hand.cards)==2:
-            possibilities.append("double")
-            if Hand.cards[1].rank==Hand.cards[0].rank:#zmienic rank na value jesli zdecydujemy sie na to zeby pozwolic splitowac np jopek-król
-                possibilities.append("split")
-            if participants[0].hands[0].cards[0]==1:
-                possibilities.append("insurance")
+            if Player.balance>=Hand.wager:
+                possibilities.append("double")
+                if Hand.cards[1].rank==Hand.cards[0].rank:#zmienic rank na value jesli zdecydujemy sie na to zeby pozwolic splitowac np jopek-król
+                    possibilities.append("split")
+        if participants[0].hands[0].cards[0]==1:
+            possibilities.append("insurance")
         print(possibilities)
-        choice=str(input("(Hand"+str(Index)+")wybór:"))
+        if len(Player.hands)>1:
+            prompt="(Hand"+str(Index)+")wybór:"
+        else:
+            prompt="wybór:"
+        choice=str(input(prompt))
     match choice:
         case "pass":
             return 1
@@ -61,8 +70,8 @@ def playerTurn(Deck,Hand,Player,participants):
             else:
                 return 1
         case "double":
+            Player.balance -= Hand.wager
             Hand.wager+=Hand.wager
-            Player.balance-=Hand.wager
             Hand.drawFrom(Deck)
             Hand.updateValue()
             showAll(participants, "player")
@@ -79,6 +88,12 @@ def playerTurn(Deck,Hand,Player,participants):
             Player.hands[Index].updateValue()
             showAll(participants, "player")
             return playerTurn(Deck,Hand,Player,participants)
+        case "insurance":
+            Player.balance-=0.5*Hand.wager
+            Hand.insurance=True
+            showAll(participants, "player")
+            return playerTurn(Deck,Hand,Player,participants)
+
 
 
 
@@ -124,5 +139,5 @@ def checkResult(Deck,participants):
                 if i.isBusted==True:
                     i.result=0
                 else:
-                    i.result=1
+                    i.result=2
 

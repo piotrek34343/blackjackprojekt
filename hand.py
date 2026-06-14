@@ -9,6 +9,7 @@ class Hand():
         self.wager=0
         self.aces=0
         self.value=0
+        self.insurance=False
     def updateValue(self):
         self.value=0
         for i in self.cards:
@@ -29,7 +30,7 @@ class Hand():
                 self.isBusted=True
     def setWager(self,wager):
         self.wager=wager
-    def show(self,player,type="full"):
+    def show(self,type="full"):
         if type=="full":
             note=""
             if self.aces!=0 and self.value!=21:
@@ -38,7 +39,6 @@ class Hand():
                 note=" BLACKJACK!!!"
             elif self.isBusted==True:
                 note=" BUSTED!!!"
-
             handSummary=""
             for i in self.cards:
                 if self.wager:
@@ -46,7 +46,6 @@ class Hand():
                 else:
                     handSummary = handSummary + i.name + ","
             handSummary=handSummary+"total value: "+str(self.value)+note
-            return handSummary
         else:
-            handSummary=str(self.cards[0].name)+",hidden card,"
-            return handSummary
+            handSummary=str(self.cards[0].name)+",hidden card"
+        return handSummary
