@@ -17,16 +17,17 @@ if numberOfPlayers == 1:
 else:
     for i in range(numberOfPlayers):
         participants.append(player.Player("player"+str(i+1)))
-game=input("zaczac gre?")
-while(game=="tak"):
+playerStartInput=input("zaczac gre?")
+Game=g.Game(Deck)
+while(playerStartInput=="tak"):
     #zaczela sie runda
-    g.roundStart(participants,Deck)
+    Game.roundStart(participants,Deck)
     for j in participants:
         if j.name != "dealer":
             for i in j.hands:
-                g.playerTurn(Deck,i,j,participants)
-    g.dealerTurn(Deck,participants)
-    g.checkResult(Deck,participants)
+                Game.playerTurn(Deck,i,j,participants)
+    Game.dealerTurn(Deck,participants)
+    Game.checkResult(Deck,participants)
     for j in participants:
         if j.name != "dealer":
             for i in j.hands:
@@ -37,4 +38,4 @@ while(game=="tak"):
                 print(j.name+" wygrana= "+str(wygrana))
     if numberOfPlayers == 1:
         print("stan konta:"+str(participants[1].balance))
-    game = input("zaczac kolejna runde?")
+    playerStartInput = input("zaczac kolejna runde?")
