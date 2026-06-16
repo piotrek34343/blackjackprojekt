@@ -1,6 +1,4 @@
-import card
-import deck
-import player
+import config as cfg
 class Hand():
     def __init__(self):
         self.cards=[]
@@ -30,12 +28,12 @@ class Hand():
                 self.isBusted=True
     def setWager(self,wager):
         self.wager=wager
-    def show(self,type="full"):
+    def show(self,owner,type="full"):
         if type=="full":
             note=""
             if self.aces!=0 and self.value!=21:
                 note=" soft"
-            elif self.value==21 and len(self.cards)==2:
+            elif self.value==21 and len(self.cards)==2 and(len(owner.hands)==1 or cfg.bjAfterSplit):
                 note=" BLACKJACK!!!"
             elif self.isBusted==True:
                 note=" BUSTED!!!"

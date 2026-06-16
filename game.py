@@ -1,4 +1,3 @@
-from unittest import case
 import card
 import deck
 import hand
@@ -15,10 +14,6 @@ class Game:
             else:
                 for i in range(cfg.numberOfPlayers):
                     self.participants.append(player.Player("player" + str(i + 1)))
-            self.Deck.cards.append(card.Card(1))
-            self.Deck.cards.append(card.Card(14))
-            self.Deck.cards.append(card.Card(26))
-            self.Deck.cards.append(card.Card(40))
     def roundStart(self):
         for j in self.participants:
             j.addHand(hand.Hand())
@@ -27,7 +22,7 @@ class Game:
                 i.drawFrom(self.Deck)
                 if j.name != "dealer":
                     stawka = int(input(j.name+" stawka:"))
-                    while stawka > j.balance:
+                    while  stawka > j.balance and stawka<0:
                         print("za malo srodkow")
                         stawka = int(input("stawka:"))
                     i.wager=stawka
@@ -43,18 +38,18 @@ class Game:
                         handIterator = "Hand" + str(j.hands.index(i)+1)
                     print("\n" + j.name+" "+handIterator)
                     if j.name == "dealer":
-                        print(i.show("half"))
+                        print(i.show(j,"half"))
                     else:
                         print("stan konta:"+str(j.balance))
                         print("stawka:"+str(i.wager))
-                        print(i.show("full"))
+                        print(i.show(j,"full"))
         else:
             for j in self.participants:
                 for i in j.hands:
                     print("\n" + j.name)
                     if j.name != "dealer":
                         print("stawka:"+str(i.wager))
-                    print(i.show("full"))
+                    print(i.show(j,"full"))
     def printBalances(self):
         if len(self.participants) == 2:
             print("stan konta:" + str(self.participants[1].balance))
@@ -68,7 +63,7 @@ class Game:
                         wygrana += (i.wager * 1.5)
                     j.balance += wygrana
                     print(j.name + " wygrana= " + str(wygrana))
-    def playerTurn(self,Hand,Player):
+    def playerTurn(self,Hand,Player,insurancePossible=True):
         #1-pass, 2-dobierz, 3-double,4-split,5-insurance
         Index = Player.hands.index(Hand) + 1
         if Hand.value==21:
@@ -85,7 +80,7 @@ class Game:
                         else:
                             if Hand.cards[1].rank==Hand.cards[0].rank:
                                 possibilities.append("split")
-            if self.participants[0].hands[0].cards[0].value==1 and Player.balance>=(Hand.wager*0.5) and len(Player.hands)==1:
+            if self.participants[0].hands[0].cards[0].value==1 and Player.balance>=(Hand.wager*0.5) and len(Player.hands)==1 and insurancePossible:
                 possibilities.append("insurance")
             print(possibilities)
             if len(Player.hands)>1:
@@ -127,13 +122,13 @@ class Game:
                 return self.insuranceCheck(Player)
     def insuranceCheck(self,Player):
         if self.participants[0].hands[0].cards[1].value==10:
-            print("dealer ma blackjacka")
+            print("dealer ma blackjacka, gracz wygrywa "+Player.hands[0].wager)
             Player.balance +=Player.hands[0].wager
             return 1
         else:
-            print("dealer nie ma blackjacka")
+            print("dealer nie ma blackjacka, gra toczy sie dalej")
             Player.balance -= 0.5 * Player.hands[0].wager
-            return self.playerTurn(Player.hands[0].wager,Player)
+            return self.playerTurn(Player.hands[0],Player,False)
 
 
 
@@ -166,7 +161,7 @@ class Game:
                         i.result=0
                     elif i.value==dealer.value:
                         i.result=1
-                    elif i.value==21 and len(i.cards)==2:
+                    elif i.value==21 and len(i.cards)==2 and(len(j.hands)==1 or cfg.bjAfterSplit):
                         i.result=5/2
                     elif i.value>dealer.value:
                         i.result=2
@@ -181,4 +176,6 @@ class Game:
                         i.result=0
                     else:
                         i.result=2
-
+    def roundEnd(self):
+        for j in self.participants:
+            j.hands=[]
