@@ -7,27 +7,31 @@ class Game:
     def __init__(self):
             self.Deck = deck.Deck(cfg.numberOfDecks)
             self.Deck.shuffle()
+            self.Deck.cards.append(card.Card(7))
+            self.Deck.cards.append(card.Card(7))
+            self.Deck.cards.append(card.Card(7))
+            self.Deck.cards.append(card.Card(7))
             self.participants = []
             self.participants.append(player.Player("dealer"))
+            self.message=''
             if cfg.numberOfPlayers == 1:
                 self.participants.append(player.Player("player", 1000))
             else:
                 for i in range(cfg.numberOfPlayers):
                     self.participants.append(player.Player("player" + str(i + 1)))
-    def roundStart(self):
+    def canDeal(self,Player):
+        if Player.hands[0].wager <= Player.balance:
+            return True
+    def roundStart(self,selectedbet):
+        self.roundEnd()
         for j in self.participants:
-            j.addHand(hand.Hand())
             for i in j.hands:
                 i.drawFrom(self.Deck)
                 i.drawFrom(self.Deck)
-                if j.name != "dealer":
-                    stawka = int(input(j.name+" stawka:"))
-                    while  stawka > j.balance and stawka<0:
-                        print("za malo srodkow")
-                        stawka = int(input("stawka:"))
-                    i.wager=stawka
-                    j.balance-=stawka
-        self.showAll("player")
+                if j.name.lower() != "dealer":
+                    i.wager= selectedbet
+                    j.balance-= selectedbet
+        self.message="rozpoczęto rundę"
     def showAll(self,turn="player"):
         print("===============================================================")
         if turn=="player":
@@ -55,59 +59,52 @@ class Game:
             print("stan konta:" + str(self.participants[1].balance))
         #w razie dopuszczenia trybu wielu graczy tutaj else i pokazanie listy
     def showResults(self):
+        wygrana =0
         for j in self.participants:
             if j.name != "dealer":
                 for i in j.hands:
-                    wygrana = i.result * i.wager
-                    if i.insurance and self.participants[0].hands[0].cards[1].value == 10:
-                        wygrana += (i.wager * 1.5)
-                    j.balance += wygrana
-                    print(j.name + " wygrana= " + str(wygrana))
-    def playerTurn(self,Hand,Player,insurancePossible=True):
+                    wygrana += i.result * i.wager
+                j.balance += wygrana
+                self.message="całkowita wygrana= " + str(wygrana)
+    def updatePossibilites(self,Hand,Player):
+        Hand.possibilities = ["pass", "hit"]
+        if len(Hand.cards) == 2:
+            if Player.balance >= Hand.wager:
+                Hand.possibilities.append("double")
+                if len(Player.hands) < (cfg.allowedSplits + 1):
+                    if cfg.splitSameValue == 1:
+                        if Hand.cards[1].value == Hand.cards[0].value:
+                            Hand.possibilities.append("split")
+                    else:
+                        if Hand.cards[1].rank == Hand.cards[0].rank:
+                            Hand.possibilities.append("split")
+        if self.participants[0].hands[0].cards!=[]:
+            if self.participants[0].hands[0].cards[0].value == 1 and Player.balance >= (Hand.wager * 0.5) and len(
+                    Player.hands) == 1 and Hand.insurancePossible:
+                self.possibilities.append("insurance")
+    def playerTurn(self,Hand,Player,choice):
         #1-pass, 2-dobierz, 3-double,4-split,5-insurance
-        Index = Player.hands.index(Hand) + 1
+        #Index = Player.hands.index(Hand) + 1
+        Index=1
         if Hand.value==21:
             choice ="pass"
-        else:
-            possibilities=["pass","hit"]
-            if len(Hand.cards)==2:
-                if Player.balance>=Hand.wager:
-                    possibilities.append("double")
-                    if len(Player.hands)<(cfg.allowedSplits+1):
-                        if cfg.splitSameValue==1:
-                            if Hand.cards[1].value==Hand.cards[0].value:
-                                possibilities.append("split")
-                        else:
-                            if Hand.cards[1].rank==Hand.cards[0].rank:
-                                possibilities.append("split")
-            if self.participants[0].hands[0].cards[0].value==1 and Player.balance>=(Hand.wager*0.5) and len(Player.hands)==1 and insurancePossible:
-                possibilities.append("insurance")
-            print(possibilities)
-            if len(Player.hands)>1:
-                prompt="(Hand"+str(Index)+")wybór:"
-            else:
-                prompt="wybór:"
-            choice=str(input(prompt))
         match choice:
             case "pass":
-                return 1
+                Hand.isFinished=True
             case "hit":
                 Hand.drawFrom(self.Deck)
                 Hand.updateValue()
-                self.showAll("player")
-                if Hand.isBusted==False:
-                    return self.playerTurn(Hand,Player)
-                else:
-                    return 1
+                if Hand.isBusted==True:
+                    Hand.isFinished=True
             case "double":
                 Player.balance -= Hand.wager
                 Hand.wager+=Hand.wager
                 Hand.drawFrom(self.Deck)
                 Hand.updateValue()
-                self.showAll("player")
-                return 1
+                Hand.isFinished=True
             case "split":
                 newHand=hand.Hand()
+                newHand.insurancePossible=Hand.insurancePossible
                 newHand.wager=Hand.wager
                 Player.balance-=Hand.wager
                 Player.hands.insert(Index,newHand)
@@ -116,17 +113,16 @@ class Game:
                 Player.hands[Index].drawFrom(self.Deck)
                 Hand.updateValue()
                 Player.hands[Index].updateValue()
-                self.showAll( "player")
-                return self.playerTurn(Hand,Player)
             case "insurance":
                 return self.insuranceCheck(Player)
     def insuranceCheck(self,Player):
+        Player.hands[0].insurancePossible=False
         if self.participants[0].hands[0].cards[1].value==10:
-            print("dealer ma blackjacka, gracz wygrywa "+Player.hands[0].wager)
+            self.message="dealer ma blackjacka, gracz wygrywa "+ str(Player.hands[0].wager)
             Player.balance +=Player.hands[0].wager
-            return 1
+            Player.hands[0].isFinished=True
         else:
-            print("dealer nie ma blackjacka, gra toczy sie dalej")
+            self.message="dealer nie ma blackjacka, gra toczy sie dalej"
             Player.balance -= 0.5 * Player.hands[0].wager
             return self.playerTurn(Player.hands[0],Player,False)
 
@@ -135,7 +131,6 @@ class Game:
 
     def dealerTurn(self):
         Hand=self.participants[0].hands[0]
-        self.showAll("dealer")
         if Hand.value<=16:
             choice ="hit"
         elif Hand.aces!=0 and Hand.value==17:
@@ -148,7 +143,6 @@ class Game:
             case "hit":
                 Hand.drawFrom(self.Deck)
                 Hand.updateValue()
-                self.showAll("dealer")
                 if Hand.isBusted == False:
                     return self.dealerTurn()
     def checkResult(self):
@@ -179,3 +173,4 @@ class Game:
     def roundEnd(self):
         for j in self.participants:
             j.hands=[]
+            j.hands.append(hand.Hand())

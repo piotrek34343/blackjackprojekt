@@ -2,12 +2,17 @@ import config as cfg
 class Hand():
     def __init__(self):
         self.cards=[]
+        self.possibilities=[]
         self.isBusted=False
+        self.isFinished=False
+        self.insurancePossible=True
         self.result=0
         self.wager=0
         self.aces=0
         self.value=0
         self.insurance=False
+    def clearCards (self):
+        self.cards=[]
     def updateValue(self):
         self.value=0
         for i in self.cards:
@@ -46,4 +51,6 @@ class Hand():
             handSummary=handSummary+"total value: "+str(self.value)+note
         else:
             handSummary=str(self.cards[0].name)+",hidden card"
+        if type=="note":
+            return note
         return handSummary
