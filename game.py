@@ -81,7 +81,7 @@ class Game:
         if self.participants[0].hands[0].cards!=[]:
             if self.participants[0].hands[0].cards[0].value == 1 and Player.balance >= (Hand.wager * 0.5) and len(
                     Player.hands) == 1 and Hand.insurancePossible:
-                self.possibilities.append("insurance")
+                Hand.possibilities.append("insurance")
     def playerTurn(self,Hand,Player,choice):
         #1-pass, 2-dobierz, 3-double,4-split,5-insurance
         #Index = Player.hands.index(Hand) + 1
