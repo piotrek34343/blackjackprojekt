@@ -66,7 +66,7 @@ class BlackjackAdapter:
         return self.player.balance
     @property
     def current_bet(self):
-        """Aktualizuje zakład biorąc pod uwagę stan gry"""
+        """Zwraca zakład aktywnej ręki biorąc pod uwagę stan gry"""
         hand = self.active_hand
         if (self.round_active and hand is not None) or hand.wager!=0:
             return hand.wager
@@ -81,6 +81,7 @@ class BlackjackAdapter:
         return self.cardsDealt and not self._all_player_hands_finished()
 
     def get_hand_bet(self, hand):
+        """Zwraca zakład podanej ręki biorąc pod uwagę stan gry"""
         if (self.round_active and hand is not None) or hand.wager!=0:
             return hand.wager
         return self._selected_bet
@@ -111,6 +112,7 @@ class BlackjackAdapter:
             self.sync_message_from_game()
 
     def insurance_available(self):
+        self.game.updatePossibilites(self.active_hand, self.player)
         return self.active_hand is not None and self.round_active and not self._insurance_taken and "insurance" in self.active_hand.possibilities
     def can_deal(self):
         return self.player.balance>=self._selected_bet and not self.round_active

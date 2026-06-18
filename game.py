@@ -56,8 +56,7 @@ class Game:
                         if Hand.cards[1].rank == Hand.cards[0].rank:
                             Hand.possibilities.append("split")
         if self.participants[0].hands[0].cards!=[]:
-            if self.participants[0].hands[0].cards[1].value == 1 and Player.balance >= (Hand.wager * 0.5) and len(
-                    Player.hands) == 1 and Hand.insurancePossible:
+            if self.participants[0].hands[0].cards[1].value == 1 and Player.balance >= (Hand.wager * 0.5) and len(Player.hands) == 1 and not Hand.isFinished and len(Hand.cards)==2:
                 Hand.possibilities.append("insurance")
     def playerTurn(self,Hand,Player,choice):
         #1-pass, 2-dobierz, 3-double,4-split,5-insurance

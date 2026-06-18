@@ -283,7 +283,7 @@ def draw_player_hands(surface, ui, adapter, y=410):
     for idx, hand in enumerate(hands):
         x = start_x + idx * (panel_width + gap)
 
-        is_active = adapter.is_hand_active(hand)
+        is_active = (hand==adapter.active_hand)
         bg_color = (40, 90, 60) if is_active else ui.PANEL
         border_color = ui.GOLD if is_active else ui.WHITE
 
@@ -362,7 +362,7 @@ def draw_game(surface, ui, adapter, buttons):
     ins_rect = pygame.Rect(340, 540, 440, 100)
     pygame.draw.rect(surface, ui.PANEL_LIGHT, ins_rect, border_radius=12)
     pygame.draw.rect(surface, ui.GOLD, ins_rect, 2, border_radius=12)
-    if adapter.insurance_available:
+    if adapter.insurance_available():
         draw_text(
             surface, "Dealer pokazuje Asa — Insurance?",
             ui.SMALL_FONT, ui.GOLD, (ins_rect.centerx, ins_rect.y + 12), center=True,)
