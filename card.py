@@ -1,6 +1,8 @@
+"""plik przechowujący klasę card"""
 class Card(object):
+    """przyjmuje id(1-52) i automatycznie przypisuje kolor,symbol i wartosc klasy"""
     def __init__(self,id):
-        self.id = id
+        self.id = id%53
         self.suit =(id-1)//13
         self.rank = id%13
         match self.rank:
@@ -28,5 +30,3 @@ class Card(object):
                 self.name+= "Trefl"
             case 3:
                 self.name+= "Pik"
-    def __str__(self):
-        return self.name

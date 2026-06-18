@@ -1,5 +1,7 @@
+"""plik przechowujący klasę Hand"""
 import config as cfg
 class Hand():
+    """klasa przechowująca listę kart oraz informacje o ręce"""
     def __init__(self):
         self.cards=[]
         self.possibilities=[]
@@ -11,14 +13,14 @@ class Hand():
         self.aces=0
         self.value=0
         self.insurance=False
-    def clearCards (self):
-        self.cards=[]
     def updateValue(self):
+        """aktualizuje wartośc ręki"""
         self.value=0
         for i in self.cards:
             self.value+=i.value
         self.value+=(self.aces*10)
     def drawFrom(self,Deck=[]):
+        """dobiera kartę z podanej talii"""
         if len(Deck.cards)==0:
             Deck.shuffle()
         self.cards.append(Deck.cards.pop())
@@ -33,9 +35,9 @@ class Hand():
                 self.updateValue()
             else:
                 self.isBusted=True
-    def setWager(self,wager):
-        self.wager=wager
-    def show(self,owner,type="full"):
+    def show(self,owner,type="note"):
+        """zwraca string. type=note zwraca notatkę na temat ręki(używane w ui)
+        type=full i type=half zwracają tekstową reprezentację ręki(debugging)"""
         note = ""
         if self.aces != 0 and self.value != 21:
             if cfg.notifySoft:

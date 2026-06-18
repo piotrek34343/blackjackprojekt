@@ -1,3 +1,4 @@
+"""plik zawierający logikę gry"""
 import card
 import deck
 import hand
@@ -20,10 +21,9 @@ class Game:
             else:
                 for i in range(cfg.numberOfPlayers):
                     self.participants.append(player.Player("player" + str(i + 1)))
-    def canDeal(self,Player):
-        if Player.hands[0].wager <= Player.balance:
-            return True
     def roundStart(self,selectedbet):
+        """rozdaje po dwie karty kazdemu obiektowi player w game,
+        ustawia zakład gracza i odejmuje kwotę od salda"""
         self.message="rozpoczęto rundę"
         for j in self.participants:
             for i in j.hands:
@@ -33,6 +33,7 @@ class Game:
                     i.wager= selectedbet
                     j.balance-= selectedbet
     def showResults(self):
+        """przekazuje wyniki gry do self.message"""
         wygrana =0
         self.message=""
         for j in self.participants:
@@ -44,6 +45,7 @@ class Game:
                 j.balance += wygrana
                 self.message+="całkowita wygrana= " + str(wygrana)
     def updatePossibilites(self,Hand,Player):
+        """odświeża możliwości zapisane w Hand należacym do Player"""
         Hand.possibilities = ["pass", "hit"]
         if len(Hand.cards) == 2:
             if Player.balance >= Hand.wager:
@@ -59,9 +61,8 @@ class Game:
             if self.participants[0].hands[0].cards[1].value == 1 and Player.balance >= (Hand.wager * 0.5) and len(Player.hands) == 1 and not Hand.isFinished and len(Hand.cards)==2:
                 Hand.possibilities.append("insurance")
     def playerTurn(self,Hand,Player,choice):
-        #1-pass, 2-dobierz, 3-double,4-split,5-insurance
-        #Index = Player.hands.index(Hand) + 1
-        Index=1
+        """wykonuje choice(hit/pass/double/split/insurance) na obiekcie Hand gracza Player"""
+        Index = Player.hands.index(Hand) + 1
         if Hand.value==21:
             choice ="pass"
         match choice:
@@ -92,6 +93,7 @@ class Game:
             case "insurance":
                 return self.insuranceCheck(Player)
     def insuranceCheck(self,Player):
+        """rozstrzyga ubezpieczenie. przekazuje wynik do self.message i zmienia saldo Player zaleznie od wyniku"""
         Player.hands[0].insurancePossible=False
         if self.participants[0].hands[0].cards[0].value==10:
             self.message="dealer ma blackjacka, gracz wygrywa "+ str(Player.hands[0].wager)
@@ -102,10 +104,11 @@ class Game:
             Player.balance -= 0.5 * Player.hands[0].wager
             return self.playerTurn(Player.hands[0],Player,False)
     def dealerTurn(self):
+        """wykonuje CAŁĄ turę krupiera(w przeciwieństwie do playerTurn które wykonuje jeden ruch)"""
         Hand=self.participants[0].hands[0]
         if Hand.value<=16:
             choice ="hit"
-        elif Hand.aces!=0 and Hand.value==17:
+        elif Hand.aces!=0 and Hand.value==17 and cfg.dealerHitOnSoft17:
             choice ="hit"
         else:
             choice ="pass"
@@ -118,6 +121,7 @@ class Game:
                 if Hand.isBusted == False:
                     return self.dealerTurn()
     def checkResult(self):
+        """zapisuje wynik(w postaci proporcji stawki do wygranej) do każdego obiektu hand należącego do gracza"""
         players=self.participants[1:]
         dealer=self.participants[0].hands[0]
         if dealer.isBusted==False:
@@ -143,5 +147,6 @@ class Game:
                     else:
                         i.result=2
     def roundEnd(self):
+        """resetuje ręce wszystkich uczestników"""
         for j in self.participants:
             j.hands=[hand.Hand()]
