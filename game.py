@@ -7,10 +7,11 @@ class Game:
     def __init__(self):
             self.Deck = deck.Deck(cfg.numberOfDecks)
             self.Deck.shuffle()
-            self.Deck.cards.append(card.Card(7))
-            self.Deck.cards.append(card.Card(7))
-            self.Deck.cards.append(card.Card(7))
-            self.Deck.cards.append(card.Card(7))
+            self.Deck.cards.append(card.Card(6))
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(0))
+            self.Deck.cards.append(card.Card(6))
+            self.Deck.cards.append(card.Card(10))
             self.participants = []
             self.participants.append(player.Player("dealer"))
             self.message=''
@@ -23,7 +24,7 @@ class Game:
         if Player.hands[0].wager <= Player.balance:
             return True
     def roundStart(self,selectedbet):
-        self.roundEnd()
+        self.message="rozpoczęto rundę"
         for j in self.participants:
             for i in j.hands:
                 i.drawFrom(self.Deck)
@@ -31,7 +32,6 @@ class Game:
                 if j.name.lower() != "dealer":
                     i.wager= selectedbet
                     j.balance-= selectedbet
-        self.message="rozpoczęto rundę"
     def showAll(self,turn="player"):
         print("===============================================================")
         if turn=="player":
@@ -60,12 +60,15 @@ class Game:
         #w razie dopuszczenia trybu wielu graczy tutaj else i pokazanie listy
     def showResults(self):
         wygrana =0
+        self.message=""
         for j in self.participants:
             if j.name != "dealer":
                 for i in j.hands:
                     wygrana += i.result * i.wager
+                    if i.result==5/2:
+                        self.message="BLACKJACK!!!! /n"
                 j.balance += wygrana
-                self.message="całkowita wygrana= " + str(wygrana)
+                self.message+="całkowita wygrana= " + str(wygrana)
     def updatePossibilites(self,Hand,Player):
         Hand.possibilities = ["pass", "hit"]
         if len(Hand.cards) == 2:
@@ -164,9 +167,9 @@ class Game:
         else:
             for j in players:
                 for i in j.hands:
-                    if i.value == 21 and len(i.cards) == 2:
+                    if i.value == 21 and len(i.cards) == 2 and(len(j.hands)==1 or cfg.bjAfterSplit):
                         i.result = 5 / 2
-                    if i.isBusted==True:
+                    elif i.isBusted:
                         i.result=0
                     else:
                         i.result=2

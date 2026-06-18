@@ -204,6 +204,8 @@ def create_game_buttons(ui, adapter, back_to_menu):
         "double": Button("Double", (765, 620, 140, 48), adapter.double_down, ui.BLUE, ui.BLUE_HOVER),
         "split": Button("Split", (920, 620, 120, 48), adapter.split, ui.BLUE, ui.BLUE_HOVER),
         "menu": Button("Menu", (1055, 620, 120, 48), back_to_menu, ui.RED, (215, 80, 80)),
+        "insurance": Button("Insurance", (370, 568, 180, 42),adapter.take_insurance,(140, 90, 180), (170, 120, 210),),
+        "no_insurance": Button("No Insurance", (565, 568, 180, 42),adapter.decline_insurance,(140, 90, 180), (170, 120, 210),),
     }
 
 
@@ -216,6 +218,8 @@ def update_game_button_states(buttons, adapter):
     buttons["double"].enabled = adapter.can_double()
     buttons["split"].enabled = adapter.can_split()
     buttons["menu"].enabled = True
+    buttons["insurance"].enabled = adapter.insurance_available()
+    buttons["no_insurance"].enabled = adapter.insurance_available()
 
 
 def draw_menu(surface, ui, buttons):
@@ -241,7 +245,7 @@ def draw_player_hands(surface, ui, adapter, y=410):
         return
 
     panel_width = 280
-    panel_height = 220
+    panel_height = 250
     gap = 20
 
     total_width = len(hands) * panel_width + (len(hands) - 1) * gap
@@ -307,7 +311,7 @@ def draw_game(surface, ui, adapter, buttons):
     )
 
     draw_text(surface, adapter.player_name, ui.FONT, ui.WHITE, (90, 385))
-    draw_player_hands(surface, ui, adapter, y=410)
+    draw_player_hands(surface, ui, adapter, y=350)
 
     status_rect = pygame.Rect(860, 170, 320, 135)
     pygame.draw.rect(surface, ui.PANEL_LIGHT, status_rect, border_radius=16)
@@ -322,7 +326,17 @@ def draw_game(surface, ui, adapter, buttons):
         (880, 225, 280, 70),
         line_height=30,
     )
+    # insurance panel
 
+    ins_rect = pygame.Rect(340, 540, 440, 100)
+    pygame.draw.rect(surface, ui.PANEL_LIGHT, ins_rect, border_radius=12)
+    pygame.draw.rect(surface, ui.GOLD, ins_rect, 2, border_radius=12)
+    if adapter.insurance_available():
+        draw_text(
+            surface, "Dealer pokazuje Asa — Insurance?",
+            ui.SMALL_FONT, ui.GOLD, (ins_rect.centerx, ins_rect.y + 12), center=True,)
+        buttons["insurance"].draw(surface, ui)
+        buttons["no_insurance"].draw(surface, ui)
     bottom_rect = pygame.Rect(20, 595, WIDTH - 40, 100)
     pygame.draw.rect(surface, ui.PANEL, bottom_rect, border_radius=16)
     pygame.draw.rect(surface, ui.WHITE, bottom_rect, 2, border_radius=16)

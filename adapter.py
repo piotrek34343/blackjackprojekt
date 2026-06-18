@@ -12,6 +12,9 @@ class BlackjackAdapter:
         self.cardsDealt=False
         self._active_hand_index = 0
         self._selected_bet = BET_STEP
+        self._insurance_taken = False
+        self._insurance_available = False
+        self._insurance_bet = 0
 
     @property
     def player(self):
@@ -92,7 +95,7 @@ class BlackjackAdapter:
         return self._selected_bet
 
     def get_hand_status_text(self, hand):
-        hand.show("note")
+        hand.show(self.player, "note")
 
     def is_hand_active(self, hand):
         return hand is not None and hand == self.active_hand
@@ -119,6 +122,8 @@ class BlackjackAdapter:
             self.game.showResults()
             self.sync_message_from_game()
 
+    def insurance_available(self):
+        return self.active_hand is not None and self.round_active and not self._insurance_taken and "insurance" in self.active_hand.possibilities
     def can_deal(self):
         return self.player.balance>=self._selected_bet and not self.round_active
 
@@ -155,13 +160,29 @@ class BlackjackAdapter:
     def decrease_bet(self):
         self._selected_bet = max(BET_STEP, self._selected_bet - BET_STEP)
         self.cleanupIfNeeded()
+
+    def take_insurance(self):
+        if not self.insurance_available:
+            return
+        self.game.insuranceCheck(self.player)
+        self.sync_message_from_game()
+        self._insurance_taken = True
+
+    def decline_insurance(self):
+        if not self.insurance_available:
+            return
+
+        self.insurance_available = False
+        self.message = "Bez insurance."
     def deal(self):
         self.cleanupIfNeeded()
         self.cardsDealt=True
         self.game.roundStart(self._selected_bet)
+        self.message="rozpoczęto rundę"
         self.hide_dealer_first = True
         self._active_hand_index = 0
-        self.sync_message_from_game()
+        self._finish_round_if_needed()
+
 
     def hit(self):
         self.game.playerTurn(self.active_hand,self.player,"hit")
