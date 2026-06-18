@@ -66,7 +66,7 @@ class Game:
                 for i in j.hands:
                     wygrana += i.result * i.wager
                     if i.result==5/2:
-                        self.message="BLACKJACK!!!! /n"
+                        self.message="BLACKJACK!!!!!!!!!! "
                 j.balance += wygrana
                 self.message+="całkowita wygrana= " + str(wygrana)
     def updatePossibilites(self,Hand,Player):
