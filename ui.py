@@ -1,4 +1,11 @@
+"""
+Moduł interfejsu gry Blackjack.
+
+Zawiera klasy i funkcje do rysowania menu,
+stołu, kart oraz przycisków.
+"""
 import pygame
+
 
 WIDTH = 1280
 HEIGHT = 720
@@ -6,6 +13,11 @@ FPS = 60
 
 
 class UI:
+    """
+       Przechowuje kolory i fonty używane w interfejsie.
+
+       Tworzona po pygame.init().
+    """
     def __init__(self):
         self.TABLE_GREEN = (18, 102, 58)
         self.TABLE_DARK = (12, 74, 42)
@@ -31,12 +43,14 @@ class UI:
 
 
 def draw_text(surface, text, font, color, pos, center=False):
+    """Rysuje tekst na wskazanej powierzchni. Może też wyśrodkować napis."""
     img = font.render(str(text), True, color)
     rect = img.get_rect(center=pos) if center else img.get_rect(topleft=pos)
     surface.blit(img, rect)
 
 
 def draw_wrapped_text(surface, text, font, color, rect, line_height=None):
+    """Rysuje tekst z zawijaniem w podanym obszarze. Dzieli go na linie."""
     words = str(text).split()
     if not words:
         return
@@ -66,6 +80,7 @@ def draw_wrapped_text(surface, text, font, color, rect, line_height=None):
 
 
 class Button:
+    """Reprezentuje przycisk w interfejsie. Obsługuje hover i kliknięcie."""
     def __init__(
         self,
         text,
@@ -89,6 +104,7 @@ class Button:
         self.hovered = False
 
     def handle_event(self, event):
+        """Obsługuje zdarzenia myszy dla przycisku. Wykrywa najechanie i klik."""
         if not self.enabled:
             return
 
@@ -100,6 +116,7 @@ class Button:
                 self.callback()
 
     def draw(self, surface, ui):
+        """Rysuje przycisk na ekranie. Uwzględnia jego aktualny stan."""
         color = self.disabled_color if not self.enabled else (self.hover_color if self.hovered else self.base_color)
         pygame.draw.rect(surface, color, self.rect, border_radius=12)
         pygame.draw.rect(surface, self.border_color, self.rect, 2, border_radius=12)
@@ -107,6 +124,7 @@ class Button:
 
 
 def rank_to_label(rank: int) -> str:
+    """Zamienia rangę karty na tekst."""
     if rank == 1:
         return "A"
     if rank == 11:
@@ -119,6 +137,7 @@ def rank_to_label(rank: int) -> str:
 
 
 def suit_from_card_id(card_id: int) -> str:
+    """Zwraca symbol koloru karty na podstawie jej id. Rozpoznaje pik, kier, karo i trefl."""
     suits = ["♠", "♥", "♦", "♣"]
     idx = (card_id - 1) // 13
     idx = max(0, min(idx, 3))
@@ -126,14 +145,17 @@ def suit_from_card_id(card_id: int) -> str:
 
 
 def card_to_label(card) -> str:
+    """Tworzy tekstową etykietę karty. Łączy rangę i kolor w jeden napis."""
     return f"{rank_to_label(card.rank)}{suit_from_card_id(card.id)}"
 
 
 def is_red_suit(card) -> bool:
+    """Sprawdza, czy karta ma czerwony kolor. Dotyczy kierów i karo."""
     return suit_from_card_id(card.id) in ("♥", "♦")
 
 
 def draw_card(surface, ui, x, y, card=None, hidden=False):
+    """Rysuje pojedynczą kartę. Może pokazać awers albo zakryty rewers."""
     rect = pygame.Rect(x, y, 92, 132)
 
     if hidden:
@@ -160,6 +182,7 @@ def draw_card(surface, ui, x, y, card=None, hidden=False):
 
 
 def draw_hand(surface, ui, cards, start_x, y, hide_first=False):
+    """Rysuje rękę jako rząd kart. Opcjonalnie ukrywa pierwszą kartę."""
     if not cards:
         draw_text(surface, "(brak kart)", ui.SMALL_FONT, ui.WHITE, (start_x, y + 40))
         return
@@ -171,11 +194,13 @@ def draw_hand(surface, ui, cards, start_x, y, hide_first=False):
 
 
 def draw_table_background(surface, ui):
+    """Rysuje tło stołu do gry. Wypełnia ekran i dodaje dekoracyjny kształt."""
     surface.fill(ui.TABLE_GREEN)
     pygame.draw.ellipse(surface, ui.TABLE_DARK, (70, 110, WIDTH - 140, HEIGHT - 220), 6)
 
 
 def create_menu_buttons(ui, start_callback, quit_callback):
+    """Tworzy przyciski menu głównego. Zwraca ich listę."""
     return [
         Button(
             "Start",
@@ -195,6 +220,7 @@ def create_menu_buttons(ui, start_callback, quit_callback):
 
 
 def create_game_buttons(ui, adapter, back_to_menu):
+    """Tworzy przyciski używane podczas gry. Zwraca je w słowniku."""
     return {
         "minus": Button("- Bet", (120, 620, 110, 48), adapter.decrease_bet, ui.BLUE, ui.BLUE_HOVER),
         "plus": Button("+ Bet", (245, 620, 110, 48), adapter.increase_bet, ui.BLUE, ui.BLUE_HOVER),
@@ -210,6 +236,7 @@ def create_game_buttons(ui, adapter, back_to_menu):
 
 
 def update_game_button_states(buttons, adapter):
+    """Aktualizuje dostępność przycisków gry. Dopasowuje je do stanu rundy."""
     buttons["minus"].enabled = not adapter.round_active
     buttons["plus"].enabled = not adapter.round_active
     buttons["deal"].enabled = adapter.can_deal()
@@ -223,6 +250,7 @@ def update_game_button_states(buttons, adapter):
 
 
 def draw_menu(surface, ui, buttons):
+    """Rysuje ekran menu głównego. Wyświetla tytuł i przyciski."""
     draw_table_background(surface, ui)
 
     draw_text(surface, "BLACKJACK", ui.TITLE_FONT, ui.GOLD, (WIDTH // 2, 170), center=True)
@@ -238,6 +266,7 @@ def draw_menu(surface, ui, buttons):
 
 
 def draw_player_hands(surface, ui, adapter, y=410):
+    """Rysuje wszystkie ręce gracza. Pokazuje też ich status i stawki."""
     hands = adapter.player_hands
 
     if not hands:
@@ -264,22 +293,25 @@ def draw_player_hands(surface, ui, adapter, y=410):
 
         draw_text(surface, f"Hand {idx + 1}", ui.FONT, ui.WHITE, (x + 14, y + 12))
         draw_text(surface, f"Bet: ${adapter.get_hand_bet(hand)}", ui.SMALL_FONT, ui.WHITE, (x + 14, y + 48))
-        draw_text(surface, f"Suma: {adapter.get_hand_total(hand)}", ui.SMALL_FONT, ui.WHITE, (x + 14, y + 74))
+        draw_text(surface, f"Suma: {hand.value}", ui.SMALL_FONT, ui.WHITE, (x + 14, y + 74))
 
-        status_text = adapter.get_hand_status_text(hand)
+        status_text = hand.show(adapter.player,"note")
         if status_text:
             draw_text(surface, status_text, ui.SMALL_FONT, ui.GOLD, (x + 14, y + 98))
 
-        cards = adapter.get_hand_cards(hand)
+        cards = hand.cards
         card_spacing = 46 if len(cards) <= 4 else 36
         cards_start_x = x + 12
         cards_y = y + 110
+        if hand.show(adapter.player,"note")!="":
+            cards_y+=20
 
         for i, card in enumerate(cards):
             draw_card(surface, ui, cards_start_x + i * card_spacing, cards_y, card=card, hidden=False)
 
 
 def draw_game(surface, ui, adapter, buttons):
+    """Rysuje cały ekran gry. Zawiera stół, karty, komunikaty i przyciski."""
     draw_table_background(surface, ui)
 
     top_rect = pygame.Rect(20, 20, WIDTH - 40, 88)
@@ -298,19 +330,19 @@ def draw_game(surface, ui, adapter, buttons):
     draw_text(surface, f"Aktywna ręka: {active_label}", ui.SMALL_FONT, ui.WHITE, (760, 68))
     draw_text(surface, f"Bet: ${adapter.current_bet}", ui.SMALL_FONT, ui.WHITE, (1010, 68))
 
-    draw_text(surface, adapter.dealer_name, ui.FONT, ui.WHITE, (90, 135))
-    dealer_total = "?" if adapter.hide_dealer_first and adapter.round_active else adapter.get_hand_total(adapter.dealer_hand)
+    draw_text(surface, adapter.dealer.name, ui.FONT, ui.WHITE, (90, 135))
+    dealer_total = "?" if adapter.hide_dealer_first and adapter.round_active else adapter.dealer_hand.value
     draw_text(surface, f"Suma: {dealer_total}", ui.SMALL_FONT, ui.WHITE, (90, 170))
     draw_hand(
         surface,
         ui,
-        adapter.dealer_cards,
+        adapter.dealer_hand.cards,
         90,
         195,
         hide_first=adapter.hide_dealer_first and adapter.round_active,
     )
 
-    draw_text(surface, adapter.player_name, ui.FONT, ui.WHITE, (90, 385))
+    draw_text(surface, adapter.player.name, ui.FONT, ui.WHITE, (90, 385))
     draw_player_hands(surface, ui, adapter, y=350)
 
     status_rect = pygame.Rect(860, 170, 320, 135)
@@ -327,11 +359,10 @@ def draw_game(surface, ui, adapter, buttons):
         line_height=30,
     )
     # insurance panel
-
     ins_rect = pygame.Rect(340, 540, 440, 100)
     pygame.draw.rect(surface, ui.PANEL_LIGHT, ins_rect, border_radius=12)
     pygame.draw.rect(surface, ui.GOLD, ins_rect, 2, border_radius=12)
-    if adapter.insurance_available():
+    if adapter.insurance_available:
         draw_text(
             surface, "Dealer pokazuje Asa — Insurance?",
             ui.SMALL_FONT, ui.GOLD, (ins_rect.centerx, ins_rect.y + 12), center=True,)

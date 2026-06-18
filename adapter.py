@@ -1,4 +1,4 @@
-from game import Game
+"""Adapter między backendem a interfejsem. Upraszcza dostęp do danych i akcji gry."""
 import config as cfg
 BET_STEP = cfg.betStep
 
@@ -18,6 +18,7 @@ class BlackjackAdapter:
 
     @property
     def player(self):
+        """Pobiera z game objekt player. Pomija dealera."""
         for participant in self.game.participants:
             if participant.name.lower() != "dealer":
                 return participant
@@ -25,21 +26,15 @@ class BlackjackAdapter:
 
     @property
     def dealer(self):
-        for participant in getattr(self.game, "participants", []):
+        """Pobiera z game obiekt player o nazwie dealer"""
+        for participant in self.game.participants:
             if participant.name.lower() == "dealer":
                 return participant
         return None
 
     @property
-    def player_name(self):
-        return self.player.name
-
-    @property
-    def dealer_name(self):
-        return self.dealer.name
-
-    @property
     def player_hands(self):
+        """Pobiera dane z game"""
         player = self.player
         if player is None:
             return []
@@ -47,30 +42,31 @@ class BlackjackAdapter:
 
     @property
     def dealer_hand(self):
+        """Pobiera dane z game"""
         dealer = self.dealer
         if dealer is None:
             return None
         return dealer.hands[0]
 
     @property
-    def dealer_cards(self):
-        return self.dealer_hand.cards
-
-    @property
     def active_hand_index(self):
+        """Pobiera indeks aktywnej ręki z obiektu player"""
         self._active_hand_index = self.player.activeHandIndex
         return self._active_hand_index
 
     @property
     def active_hand(self):
+        """ustawia aktywną(aktualnie rozgrywaną) ręke na podstawie indeksu"""
         hands = self.player_hands
         return hands[self._active_hand_index]
 
     @property
     def balance(self):
+        """Pobiera aktualne saldo z obiektu player"""
         return self.player.balance
     @property
     def current_bet(self):
+        """Aktualizuje zakład biorąc pod uwagę stan gry"""
         hand = self.active_hand
         if (self.round_active and hand is not None) or hand.wager!=0:
             return hand.wager
@@ -81,21 +77,13 @@ class BlackjackAdapter:
 
     @property
     def round_active(self):
+        """Sprawdza czy aktualnie trwa runda. Zwraca bool"""
         return self.cardsDealt and not self._all_player_hands_finished()
 
-    def get_hand_cards(self, hand):
-        return hand.cards
-
-    def get_hand_total(self, hand):
-       return hand.value
-
     def get_hand_bet(self, hand):
-        if (self.round_active and hand is not None and hasattr(hand, "wager") ) or hand.wager!=0:
+        if (self.round_active and hand is not None) or hand.wager!=0:
             return hand.wager
         return self._selected_bet
-
-    def get_hand_status_text(self, hand):
-        hand.show(self.player, "note")
 
     def is_hand_active(self, hand):
         return hand is not None and hand == self.active_hand

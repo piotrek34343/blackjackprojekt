@@ -3,4 +3,5 @@ numberOfDecks=1 #ilosc talii w grze
 allowedSplits=1 #dozwolona ilość splitów w jednej rundzie(dostosowac pozniej na podstawie mozliwosci ui)
 bjAfterSplit=0 # decyduje o tym czy po splicie mozna dostac wyplate 3 do 2 za blackjack
 betStep=10 #ilosc o jaką zwieksza/zmniejsza sie zaklad
+notifySoft=False #czy informacja o ręce powinna informowac o "miękkim" wyniku?
 numberOfPlayers=1 # tryb wielu graczy nie jest zaimplementowany

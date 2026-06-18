@@ -1,3 +1,9 @@
+"""
+Główny moduł gry Blackjack.
+
+Uruchamia Pygame, obsługuje stany aplikacji
+i główną pętlę programu.
+"""
 import sys
 import pygame
 import game as g
@@ -16,7 +22,14 @@ from ui import (
 )
 
 
+
 def main():
+    """
+    Uruchamia aplikację.
+
+    Tworzy okno, backend, przyciski i obsługuje
+    zdarzenia oraz rysowanie ekranów.
+    """
     pygame.init()
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))

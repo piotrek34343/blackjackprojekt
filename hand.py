@@ -38,7 +38,8 @@ class Hand():
     def show(self,owner,type="full"):
         note = ""
         if self.aces != 0 and self.value != 21:
-            note = " soft"
+            if cfg.notifySoft:
+                note = " soft"
         elif self.value == 21 and len(self.cards) == 2 and (len(owner.hands) == 1 or cfg.bjAfterSplit):
             note = " BLACKJACK!!!"
         elif self.isBusted == True:
