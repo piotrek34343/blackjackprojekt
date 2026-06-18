@@ -114,14 +114,13 @@ class BlackjackAdapter:
 
     def _finish_round_if_needed(self):
         if self._all_player_hands_finished():
-            self.cardsDealt = False
             self.game.dealerTurn()
             self.game.checkResult()
             self.game.showResults()
             self.sync_message_from_game()
 
     def can_deal(self):
-        return self.player.balance>=self._selected_bet and self.cardsDealt==False
+        return self.player.balance>=self._selected_bet and not self.round_active
 
     def can_hit(self):
         hand = self.active_hand
@@ -144,15 +143,20 @@ class BlackjackAdapter:
         if hand is None or self.is_hand_finished(hand) or "split" not in(self.active_hand.possibilities) or not self.round_active:
             return False
         return True
-
+    def cleanupIfNeeded(self):
+        if self._all_player_hands_finished() and self.cardsDealt:
+            self.player.activeHandIndex=0
+            self.game.roundEnd()
+            self.cardsDealt = False
     def increase_bet(self):
         if self.game.participants[1].balance>= BET_STEP:
             self._selected_bet += BET_STEP
-
+        self.cleanupIfNeeded()
     def decrease_bet(self):
         self._selected_bet = max(BET_STEP, self._selected_bet - BET_STEP)
-
+        self.cleanupIfNeeded()
     def deal(self):
+        self.cleanupIfNeeded()
         self.cardsDealt=True
         self.game.roundStart(self._selected_bet)
         self.hide_dealer_first = True

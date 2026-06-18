@@ -156,7 +156,7 @@ def draw_card(surface, ui, x, y, card=None, hidden=False):
     color = ui.RED if is_red_suit(card) else ui.BLACK
 
     draw_text(surface, label, ui.CARD_FONT, color, (x + 10, y + 8))
-    draw_text(surface, label, ui.CARD_FONT, color, (x + 46, y + 66), center=True)
+    draw_text(surface, label, ui.CARD_FONT, color, (x + 64, y + 106), center=True)
 
 
 def draw_hand(surface, ui, cards, start_x, y, hide_first=False):

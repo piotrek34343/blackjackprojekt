@@ -172,5 +172,4 @@ class Game:
                         i.result=2
     def roundEnd(self):
         for j in self.participants:
-            j.hands=[]
-            j.hands.append(hand.Hand())
+            j.hands=[hand.Hand()]
