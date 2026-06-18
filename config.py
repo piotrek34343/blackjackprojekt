@@ -8,6 +8,13 @@ bjAfterSplit=0 # decyduje o tym czy po splicie mozna dostac wyplate 3 do 2 za bl
 betStep=10 #ilosc o jaką zwieksza/zmniejsza sie zaklad
 dealerHitOnSoft17=True #decyduje o tym czy dealer dobiera na miękkiej 17
 notifySoft=False #czy informacja o ręce powinna informowac o "miękkim" wyniku?
+#tryby do debugowania:
+#są tu po to żeby móc łatwo sprawdzić jak program zachowa się w danej sytuacji(bez liczenia na szczęście)
+#wybranie kilku na raz spowoduje że program wybierze pierwszy od góry
+insuranceWon=False #gwarantuje mozliwosc insurance i blackjack krupiera w pierwszej rundzie
+insuranceLost=False #gwarantuje odkrytego asa i przegrany insurance w pierwszej rundzie
+playerGetSplit=False #gwarantuje mozliwosc split w pierwszej rundzie
+playerGetBlackJack=False #gwarantuje blackjack w pierszej rundzie
 #nie zmieniać(nyi)
 allowedSplits=1 #dozwolona ilość splitów w jednej rundzie(dostosowac pozniej na podstawie mozliwosci ui)
 numberOfPlayers=1 # tryb wielu graczy nie jest zaimplementowany

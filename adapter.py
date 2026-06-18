@@ -14,7 +14,6 @@ class BlackjackAdapter:
         self._selected_bet = BET_STEP
         self._insurance_taken = False
         self._insurance_available = False
-        self._insurance_bet = 0
 
     @property
     def player(self):
@@ -171,7 +170,7 @@ class BlackjackAdapter:
         if not self.insurance_available:
             return
 
-        self.insurance_available = False
+        self._insurance_taken = True
         self.message = "Bez insurance."
     def deal(self):
         """zatwierdza stawkę(w przypadku braku zmiany jest to stawka z poprzedniej gry),

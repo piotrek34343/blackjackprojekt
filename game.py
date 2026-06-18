@@ -8,11 +8,7 @@ class Game:
     def __init__(self):
             self.Deck = deck.Deck(cfg.numberOfDecks)
             self.Deck.shuffle()
-            self.Deck.cards.append(card.Card(6))
-            self.Deck.cards.append(card.Card(1))
-            self.Deck.cards.append(card.Card(6))
-            self.Deck.cards.append(card.Card(1))
-            self.Deck.cards.append(card.Card(0))
+            self.checkDebug()
             self.participants = []
             self.participants.append(player.Player("dealer"))
             self.message=''
@@ -21,6 +17,28 @@ class Game:
             else:
                 for i in range(cfg.numberOfPlayers):
                     self.participants.append(player.Player("player" + str(i + 1)))
+    def checkDebug(self):
+        """Sprawdza i uruchamia tryby które dodałem do debugowania"""
+        if cfg.insuranceWon == True:
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(6))
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(0))
+        elif cfg.insuranceLost == True:
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(6))
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(1))
+        elif cfg.playerGetSplit ==True:
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(10))
+            self.Deck.cards.append(card.Card(6))
+        elif cfg.playerGetBlackJack==True:
+            self.Deck.cards.append(card.Card(1))
+            self.Deck.cards.append(card.Card(10))
+            self.Deck.cards.append(card.Card(10))
+            self.Deck.cards.append(card.Card(6))
     def roundStart(self,selectedbet):
         """rozdaje po dwie karty kazdemu obiektowi player w game,
         ustawia zakład gracza i odejmuje kwotę od salda"""
@@ -106,7 +124,9 @@ class Game:
     def dealerTurn(self):
         """wykonuje CAŁĄ turę krupiera(w przeciwieństwie do playerTurn które wykonuje jeden ruch)"""
         Hand=self.participants[0].hands[0]
-        if Hand.value<=16:
+        if len(self.participants[1].hands)==1 and self.participants[1].hands[0].result==5/2:
+            choice="pass"
+        elif Hand.value<=16:
             choice ="hit"
         elif Hand.aces!=0 and Hand.value==17 and cfg.dealerHitOnSoft17:
             choice ="hit"
